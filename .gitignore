@@ -3,3 +3,4 @@
 /ogr2osm
 /shp
 venv/
+secrets.py
