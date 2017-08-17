@@ -7,8 +7,7 @@ before_install:
   - sudo apt-get -qq update
 
 install:
-  - git clone --recursive https://github.com/pnorman/ogr2osm
-  - sudo apt-get install python-gdal python-lxml curl
+  - pip install boto requests
 
 script:
-  - ./mrwa2osm.sh
+  - python mrwa2s3.py

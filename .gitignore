@@ -2,5 +2,4 @@
 *-runner.sh
 /ogr2osm
 /shp
-
-
+venv/
