@@ -100,6 +100,8 @@ with open("datasets.json", "r") as f:
 # Setup a Session object globally to be used by all calls to requests
 # c.f. http://docs.python-requests.org/en/latest/user/advanced/
 s = requests.Session()
+print "SLIP_USER"
+print os.environ["SLIP_USER"]
 s.auth = (os.environ["SLIP_USER"], os.environ["SLIP_PASS"])
 s.headers.update({"User-Agent": "QGIS"})
 
