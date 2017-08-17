@@ -76,7 +76,7 @@ def fetchDownloadSnapshot(URL):
     is received for the given URL.
     """
 
-    response = s.get(URL, allow_redirects=False)
+    response = s.get(URL, allow_redirects=False, verify=False)
     if response.status_code == 302:
         parsed_uri = urlparse(response.headers['Location'])
         domain = "{uri.scheme}://{uri.netloc}/".format(uri=parsed_uri)
@@ -100,7 +100,6 @@ with open("datasets.json", "r") as f:
 # Setup a Session object globally to be used by all calls to requests
 # c.f. http://docs.python-requests.org/en/latest/user/advanced/
 s = requests.Session()
-s.verify = False
 s.auth = (os.environ["SLIP_USER"], os.environ["SLIP_PASS"])
 s.headers.update({"User-Agent": "QGIS"})
 
