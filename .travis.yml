@@ -5,6 +5,7 @@ virtualenv:
 
 before_install:
   - sudo apt-get -qq update
+  - export BOTO_CONFIG=/dev/null
 
 install:
   - pip install boto requests
