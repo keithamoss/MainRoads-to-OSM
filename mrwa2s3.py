@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import json
 from urlparse import urlparse
@@ -6,7 +7,6 @@ import boto
 from boto.s3.key import Key
 from urlparse import urlparse
 import datetime
-from __future__ import print_function
 import sys
 
 
@@ -115,25 +115,31 @@ s.auth = (os.environ["SLIP_USER"], os.environ["SLIP_PASS"])
 s.headers.update({"User-Agent": "QGIS"})
 
 for dataset_url in datasets:
-    print dataset_url
+    print("Processing %s" % dataset_url)
     eprint("Foo!")
 
     # Fetch from SLIP
-    response = fetchDownloadSnapshot(dataset_url)
-    filename = os.path.basename(urlparse(dataset_url).path)
-    with open(filename, mode="wb") as localfile:
+    try:
+        response = fetchDownloadSnapshot(dataset_url)
+    except Exception as e:
+        eprint(str(e))
+
+    zip_filename = os.path.basename(urlparse(dataset_url).path)
+    with open(zip_filename, mode="wb") as localfile:
         localfile.write(response.content)
 
     # Upload to S3
-    with open(filename, "r") as file:
+    with open(zip_filename, "r") as file:
         datetimestamp = datetime.datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
         filename, file_extension = os.path.splitext(file.name)
 
-        key = "{}/{}_{}{}".format(filename, filename,
-                                  datetimestamp, file_extension)
+        key = "{}/{}_{}{}".format(filename, filename, datetimestamp, file_extension)
         bucket = "geogig"
 
         if upload_to_s3(os.environ["AWS_ACCESS_KEY"], os.environ["AWS_ACCESS_SECRET_KEY"], file, bucket, key):
-            print 'It worked!'
+            print("Upload Succeeded")
         else:
-            print 'The upload failed...'
+            print("Upload Failed")
+
+    # Tidy up
+    os.remove(os.path.join(os.getcwd(), zip_filename))
