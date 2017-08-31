@@ -6,6 +6,13 @@ import boto
 from boto.s3.key import Key
 from urlparse import urlparse
 import datetime
+from __future__ import print_function
+import sys
+
+
+def eprint(*args, **kwargs):
+    """ https://stackoverflow.com/a/14981125 """
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def upload_to_s3(aws_access_key_id, aws_secret_access_key, file, bucket, key, callback=None, md5=None, reduced_redundancy=False, content_type=None):
@@ -109,6 +116,7 @@ s.headers.update({"User-Agent": "QGIS"})
 
 for dataset_url in datasets:
     print dataset_url
+    eprint("Foo!")
 
     # Fetch from SLIP
     response = fetchDownloadSnapshot(dataset_url)
