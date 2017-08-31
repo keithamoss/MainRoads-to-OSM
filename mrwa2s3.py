@@ -110,14 +110,14 @@ s.headers.update({"User-Agent": "QGIS"})
 areThereErrors = False
 
 for dataset_url in datasets:
-    print("Processing %s" % dataset_url)
-    areThereErrors = True
+    print(dataset_url)
 
     # Fetch from SLIP
     try:
         response = fetchDownloadSnapshot(dataset_url)
     except Exception as e:
         print(str(e))
+        areThereErrors = True
 
     zip_filename = os.path.basename(urlparse(dataset_url).path)
     with open(zip_filename, mode="wb") as localfile:
@@ -135,6 +135,8 @@ for dataset_url in datasets:
             print("Upload Succeeded")
         else:
             print("Upload Failed")
+            areThereErrors = True
+        print("")
 
     # Tidy up
     os.remove(os.path.join(os.getcwd(), zip_filename))
