@@ -1,4 +1,3 @@
-# from __future__ import print_function
 import os
 import json
 from urlparse import urlparse
@@ -7,12 +6,6 @@ import boto
 from boto.s3.key import Key
 from urlparse import urlparse
 import datetime
-import sys
-
-
-# def eprint(*args, **kwargs):
-#     """ https://stackoverflow.com/a/14981125 """
-#     print(*args, file=sys.stderr, **kwargs)
 
 
 def upload_to_s3(aws_access_key_id, aws_secret_access_key, file, bucket, key, callback=None, md5=None, reduced_redundancy=False, content_type=None):
@@ -114,10 +107,11 @@ s = requests.Session()
 s.auth = (os.environ["SLIP_USER"], os.environ["SLIP_PASS"])
 s.headers.update({"User-Agent": "QGIS"})
 
+areThereErrors = False
+
 for dataset_url in datasets:
     print("Processing %s" % dataset_url)
-    # eprint("Foo!")
-    print >> sys.stderr, "Foobar!"
+    areThereErrors = True
 
     # Fetch from SLIP
     try:
@@ -144,3 +138,7 @@ for dataset_url in datasets:
 
     # Tidy up
     os.remove(os.path.join(os.getcwd(), zip_filename))
+
+
+if areThereErrors is True:
+    exit(1)
