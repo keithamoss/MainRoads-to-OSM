@@ -8,7 +8,7 @@ before_install:
   - export BOTO_CONFIG=/dev/null
 
 install:
-  - pip install boto requests
+  - pip install boto requests urllib3[secure]
 
 script:
   - python mrwa2s3.py

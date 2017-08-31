@@ -139,7 +139,7 @@ for dataset_url in datasets:
         if upload_to_s3(os.environ["AWS_ACCESS_KEY"], os.environ["AWS_ACCESS_SECRET_KEY"], file, bucket, key):
             print("Upload Succeeded")
         else:
-            print("Upload Failed")
+            eprint("Upload Failed")
 
     # Tidy up
     os.remove(os.path.join(os.getcwd(), zip_filename))
