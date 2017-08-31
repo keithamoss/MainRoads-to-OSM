@@ -117,6 +117,7 @@ s.headers.update({"User-Agent": "QGIS"})
 for dataset_url in datasets:
     print("Processing %s" % dataset_url)
     eprint("Foo!")
+    print >> sys.stderr, "Foobar!"
 
     # Fetch from SLIP
     try:
