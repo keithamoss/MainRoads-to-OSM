@@ -76,7 +76,7 @@ def fetchDownloadSnapshot(URL):
     is received for the given URL.
     """
 
-    response = s.get(URL, allow_redirects=False, verify=False)
+    response = s.get(URL, allow_redirects=False)
     if response.status_code == 302:
         parsed_uri = urlparse(response.headers['Location'])
         domain = "{uri.scheme}://{uri.netloc}/".format(uri=parsed_uri)
@@ -87,7 +87,9 @@ def fetchDownloadSnapshot(URL):
                 parsed_uri.netloc, response.headers['Location']))
 
     if response.status_code == 200:
-        return response
+        if response.headers["Content-Type"] == "application/zip":
+            return response
+        raise Exception("Received an invalid Content-Type response - should be 'application/zip', but was '{}'".format(response.headers["Content-Type"]))
     else:
         raise Exception("Received a '%s' response for the URL %s" %
                         (response.status_code, URL))
@@ -100,8 +102,8 @@ with open("datasets.json", "r") as f:
 # Setup a Session object globally to be used by all calls to requests
 # c.f. http://docs.python-requests.org/en/latest/user/advanced/
 s = requests.Session()
-print "SLIP_USER"
-print os.environ["SLIP_USER"]
+# Pro tip: Travis requires environment variables with special characters
+# (e.g. $) to be escaped
 s.auth = (os.environ["SLIP_USER"], os.environ["SLIP_PASS"])
 s.headers.update({"User-Agent": "QGIS"})
 

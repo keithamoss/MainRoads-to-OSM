@@ -4,3 +4,5 @@
 /shp
 venv/
 secrets.py
+env-vars.txt
+*.zip
