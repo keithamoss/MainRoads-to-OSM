@@ -1,4 +1,4 @@
-from __future__ import print_function
+# from __future__ import print_function
 import os
 import json
 from urlparse import urlparse
@@ -10,9 +10,9 @@ import datetime
 import sys
 
 
-def eprint(*args, **kwargs):
-    """ https://stackoverflow.com/a/14981125 """
-    print(*args, file=sys.stderr, **kwargs)
+# def eprint(*args, **kwargs):
+#     """ https://stackoverflow.com/a/14981125 """
+#     print(*args, file=sys.stderr, **kwargs)
 
 
 def upload_to_s3(aws_access_key_id, aws_secret_access_key, file, bucket, key, callback=None, md5=None, reduced_redundancy=False, content_type=None):
@@ -116,14 +116,14 @@ s.headers.update({"User-Agent": "QGIS"})
 
 for dataset_url in datasets:
     print("Processing %s" % dataset_url)
-    eprint("Foo!")
+    # eprint("Foo!")
     print >> sys.stderr, "Foobar!"
 
     # Fetch from SLIP
     try:
         response = fetchDownloadSnapshot(dataset_url)
     except Exception as e:
-        eprint(str(e))
+        print(str(e))
 
     zip_filename = os.path.basename(urlparse(dataset_url).path)
     with open(zip_filename, mode="wb") as localfile:
@@ -140,7 +140,7 @@ for dataset_url in datasets:
         if upload_to_s3(os.environ["AWS_ACCESS_KEY"], os.environ["AWS_ACCESS_SECRET_KEY"], file, bucket, key):
             print("Upload Succeeded")
         else:
-            eprint("Upload Failed")
+            print("Upload Failed")
 
     # Tidy up
     os.remove(os.path.join(os.getcwd(), zip_filename))
