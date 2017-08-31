@@ -132,7 +132,7 @@ for dataset_url in datasets:
         bucket = "geogig"
 
         if upload_to_s3(os.environ["AWS_ACCESS_KEY"], os.environ["AWS_ACCESS_SECRET_KEY"], file, bucket, key):
-            print("Upload Succeeded")
+            print("Upload Succeeded %s" % (key))
         else:
             print("Upload Failed")
             areThereErrors = True

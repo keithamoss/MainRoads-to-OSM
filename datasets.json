@@ -1,3 +1,8 @@
 [
-    "https://maps.slip.wa.gov.au/datadownloads/WAM_Public_Services/WAM_Public_Secure_Services/ShipwrecksWAM_002/ShipwrecksWAM_002.zip"
+    "https://maps.slip.wa.gov.au/datadownloads/WAM_Public_Services/WAM_Public_Secure_Services/ShipwrecksWAM_002/ShipwrecksWAM_002.zip",
+    "https://maps.slip.wa.gov.au/datadownloads/SHO_Public_Services/SHO_Public_Secure_Services/HeritageCouncilWA_StateRegisterSHO_003/HeritageCouncilWA_StateRegisterSHO_003.zip",
+    "https://maps.slip.wa.gov.au/datadownloads/MRWA_Public_Services/MRWA_Public_Secure_Services/RoadNetworkMRWA_514/RoadNetworkMRWA_514.zip",
+    "https://maps.slip.wa.gov.au/datadownloads/Landgate_Public_Services/Geonoma_Public_Secure_Services/GeographicNamesGEONOMALGATE_013/GeographicNamesGEONOMALGATE_013.zip",
+    "https://maps.slip.wa.gov.au/datadownloads/Landgate_Public_Services/Cadastre_Public_Secure_Services/CadastreAddressLGATE_002/CadastreAddressLGATE_002.zip",
+    "https://maps.slip.wa.gov.au/datadownloads/Landgate_Public_Services/Cadastre_Public_Secure_Services/CadastreLodgedLGATE_003/CadastreLodgedLGATE_003.zip"
 ]
