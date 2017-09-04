@@ -11,4 +11,4 @@ install:
   - pip install boto requests urllib3[secure]
 
 script:
-  - python mrwa2s3.py
+  - travis_wait python mrwa2s3.py
