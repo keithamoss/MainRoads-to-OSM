@@ -6,3 +6,8 @@ venv/
 secrets.py
 env-vars.txt
 *.zip
+CadastreAddressLGATE_002_2017-08-31-12_08_49/*
+geogig.txt
+.vscode/*
+*.pyc
+out*.txt

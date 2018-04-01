@@ -1,146 +1,81 @@
 import os
-import json
-from urlparse import urlparse
-import requests
-import boto
-from boto.s3.key import Key
-from urlparse import urlparse
-import datetime
+import tempfile
+from lib.logset import myLog
+logger = myLog()
 
+import lib.slip
+import lib.s3
+import lib.utils
+import lib.ckan
+import lib.stats
 
-def upload_to_s3(aws_access_key_id, aws_secret_access_key, file, bucket, key, callback=None, md5=None, reduced_redundancy=False, content_type=None):
-    """
-    Uploads the given file to the AWS S3
-    bucket and key specified.
+stats = lib.stats.get_stats_object()
 
-    callback is a function of the form:
+for dataset in lib.ckan.get_public_slip_shapefiles():
+    logger.info(dataset["name"])
 
-    def callback(complete, total)
+    stats["datasetsWithPublicShapefiles"] += 1
+    if len(dataset["resource_urls"]) > 1:
+        stats["datasetWithMultipleShapefiles"] += 1
 
-    The callback should accept two integer parameters,
-    the first representing the number of bytes that
-    have been successfully transmitted to S3 and the
-    second representing the size of the to be transmitted
-    object.
+    for dataset_url in dataset["resource_urls"]:
+        dataset_name = lib.slip.get_dataset_name_from_dataset_url(dataset_url)
 
-    Returns boolean indicating success/failure of upload.
+        try:
+            latest = lib.s3.fetch_latest_json_metadata(dataset_name)
+            slip_id = lib.slip.get_slip_id_from_dataset_title(dataset["title"])
+            logger.info(slip_id)
+            lastRefreshTime = lib.slip.fetch_last_refresh_time_for_dataset(slip_id)
+            logger.info(lastRefreshTime)
 
-    http://stackabuse.com/example-upload-a-file-to-aws-s3/
-    """
-    try:
-        size = os.fstat(file.fileno()).st_size
-    except:
-        # Not all file objects implement fileno(),
-        # so we fall back on this
-        file.seek(0, os.SEEK_END)
-        size = file.tell()
+            if lastRefreshTime is False:
+                stats["datasetsWithAFalseResponseFromDUT"] += 1
+            elif lastRefreshTime == 0:
+                stats["datasetsWithA0ResponseFromDUT"] += 1
 
-    conn = boto.s3.connect_to_region(
-        "ap-southeast-2", aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
-    bucket = conn.get_bucket(bucket, validate=True)
-    k = Key(bucket)
-    k.key = key
-    if content_type:
-        k.set_metadata('Content-Type', content_type)
-    sent = k.set_contents_from_file(
-        file, cb=callback, md5=md5, reduced_redundancy=reduced_redundancy, rewind=True)
+            if lib.slip.should_we_download(latest, lastRefreshTime) == True:
+                # Fetch from SLIP's data snapshots file server
+                response = lib.slip.fetch_download_snapshot(dataset_url)
 
-    # Rewind for later use
-    file.seek(0)
+                if response.status_code == 200:
+                    # Write to a temporary file we can work with
+                    with tempfile.NamedTemporaryFile(suffix=".zip", dir=os.path.join(os.getcwd(), "tmp")) as file:
+                        file.write(response.content)
+                        file.seek(0)
 
-    if sent == size:
-        return True
-    return False
+                        # A dataset being updated in SLIP doesn't actually mean that
+                        # it has changed, so let's compare MD5 checksums to see if we
+                        # need to actually upload this file.
+                        if latest is False or latest["md5_checksum"] != lib.utils.md5_hash_file(file.name):
+                            logger.info("Uploading...")
+                            stats["datasetsWithChangedData"] += 1
 
+                            # Upload the zipped data to S3
+                            s3_key = lib.slip.get_s3_key_name_from_dataset_url(dataset_url)
+                            lib.s3.upload_to_s3(file.name, s3_key)
 
-def fetchDownloadSnapshot(URL):
-    """Fetch a given data snapshot from SLIP and take care of
-    following redirects and passing our credentials.
-    :param verbose: Be verbose (give additional messages).
+                            # Refresh and upload a new latest.json metadata file to S3
+                            lib.s3.create_and_upload_latest_json_metadata(file.name, s3_key, lastRefreshTime)
 
-    This is required to work around a design decision in the
-    requests library that limits passing authentication credentials
-    on requests.Session() objects to URLs that match the domain of
-    the original URL. In SLIP's case we must traverse maps.slip.wa.gov.au
-    and sso.slip.wa.gov.au.
+                        else:
+                            logger.info("Skip downloading (checksum match)")
+                            stats["datasetsSkippedDueToChecksumMatch"] += 1
 
-    See https://github.com/requests/requests/issues/2949 for further discussion.
+            else:
+                logger.info("Skip downloading (no need to download due to SLIP ticks)")
+                stats["datasetsSkippedDueToSLIPTicks"] += 1
 
-    Args:
-        URL (str): A URL to a data snapshot file or resource.
+        except Exception as e:
+            logger.error(str(e))
 
-    Returns:
-        object: A response object from the requests library.
+        logger.info("")
 
-    Raises exception if authentication fails or a non-200 response
-    is received for the given URL.
-    """
+# Stats
+lib.stats.print_stats(stats)
+lib.stats.update_stats(stats)
 
-    response = s.get(URL, allow_redirects=False)
-    if response.status_code == 302:
-        parsed_uri = urlparse(response.headers['Location'])
-        domain = "{uri.scheme}://{uri.netloc}/".format(uri=parsed_uri)
-        if parsed_uri.netloc.startswith("sso.slip.wa.gov.au") or parsed_uri.netloc.startswith("maps.slip.wa.gov.au"):
-            response = fetchDownloadSnapshot(response.headers['Location'])
-        else:
-            raise Exception("Receieved a redirect to an unknown domain '%s' for %s" % (
-                parsed_uri.netloc, response.headers['Location']))
-
-    if response.status_code == 200:
-        if response.headers["Content-Type"] == "application/zip":
-            return response
-        raise Exception("Received an invalid Content-Type response - should be 'application/zip', but was '{}'".format(response.headers["Content-Type"]))
-    else:
-        raise Exception("Received a '%s' response for the URL %s" %
-                        (response.status_code, URL))
-
-
-# Fetch datasets config
-with open("datasets.json", "r") as f:
-    datasets = json.load(f)
-
-# Setup a Session object globally to be used by all calls to requests
-# c.f. http://docs.python-requests.org/en/latest/user/advanced/
-s = requests.Session()
-# Pro tip: Travis requires environment variables with special characters
-# (e.g. $) to be escaped
-s.auth = (os.environ["SLIP_USER"], os.environ["SLIP_PASS"])
-s.headers.update({"User-Agent": "QGIS"})
-
-areThereErrors = False
-
-for dataset_url in datasets:
-    print(dataset_url)
-
-    # Fetch from SLIP
-    try:
-        response = fetchDownloadSnapshot(dataset_url)
-    except Exception as e:
-        print(str(e))
-        areThereErrors = True
-
-    zip_filename = os.path.basename(urlparse(dataset_url).path)
-    with open(zip_filename, mode="wb") as localfile:
-        localfile.write(response.content)
-
-    # Upload to S3
-    with open(zip_filename, "r") as file:
-        datetimestamp = datetime.datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
-        filename, file_extension = os.path.splitext(file.name)
-
-        key = "{}/{}_{}{}".format(filename, filename, datetimestamp, file_extension)
-        bucket = "geogig"
-
-        if upload_to_s3(os.environ["AWS_ACCESS_KEY"], os.environ["AWS_ACCESS_SECRET_KEY"], file, bucket, key):
-            print("Upload Succeeded %s" % (key))
-        else:
-            print("Upload Failed")
-            areThereErrors = True
-        print("")
-
-    # Tidy up
-    os.remove(os.path.join(os.getcwd(), zip_filename))
-
-
-if areThereErrors is True:
+# So Travis-CI will notify us of issues
+if logger.has_critical_or_errors():
+    print "We've got a few errors:"
+    print logger.status()
     exit(1)

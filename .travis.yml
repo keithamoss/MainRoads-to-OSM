@@ -8,7 +8,7 @@ before_install:
   - export BOTO_CONFIG=/dev/null
 
 install:
-  - pip install boto requests urllib3[secure]
+  - pip install -r requirements.txt
 
 script:
   - travis_wait python mrwa2s3.py
