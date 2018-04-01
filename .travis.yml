@@ -12,3 +12,6 @@ install:
 
 script:
   - travis_wait 60 python mrwa2s3.py
+
+after_script:
+  - sleep 1

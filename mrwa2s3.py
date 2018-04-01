@@ -15,7 +15,7 @@ if not os.path.exists(tmp_dir):
 
 stats = lib.stats.get_stats_object()
 
-for dataset in lib.ckan.get_public_slip_shapefiles():
+for dataset in lib.ckan.get_public_slip_shapefiles()[:20]:
     logger.info(dataset["name"])
 
     stats["datasetsWithPublicShapefiles"] += 1
@@ -82,4 +82,4 @@ lib.stats.update_stats(stats)
 if logger.has_critical_or_errors():
     print "We've got a few errors:"
     print logger.status()
-    # exit(1)
+    exit(1)
