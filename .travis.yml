@@ -11,4 +11,4 @@ install:
   - pip install -r requirements.txt
 
 script:
-  - travis_wait python mrwa2s3.py
+  - travis_wait 60 python mrwa2s3.py
