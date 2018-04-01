@@ -2,11 +2,8 @@ import requests
 from lib.logset import myLog
 logger = myLog()
 
-# import urllib3
-# urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def get_public_slip_shapefiles():
@@ -15,7 +12,7 @@ def get_public_slip_shapefiles():
     """
 
     url = "https://catalogue.data.wa.gov.au/api/3/action/current_package_list_with_resources?limit=1100"
-    response = requests.get(url)
+    response = requests.get(url, verify=False)
 
     if response.status_code == 200:
         datasets = []

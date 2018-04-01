@@ -58,7 +58,7 @@ def fetch_download_snapshot(url):
 
     global session
 
-    response = session.get(url, allow_redirects=False)
+    response = session.get(url, allow_redirects=False, verify=False)
     if response.status_code == 302:
         parsed_uri = urlparse(response.headers['Location'])
         domain = "{uri.scheme}://{uri.netloc}/".format(uri=parsed_uri)
@@ -83,7 +83,7 @@ def fetch_last_refresh_time_for_dataset(slip_id):
     """
 
     url = "https://selfservice.slip.wa.gov.au/Api/Index?id={}".format(slip_id)
-    response = requests.get(url)
+    response = requests.get(url, verify=False)
 
     if response.status_code == 200:
         return response.json()["LastSuccessfulUpload"]
