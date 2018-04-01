@@ -6,6 +6,9 @@ import requests
 from lib.logset import myLog
 logger = myLog()
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 # Setup a Session object globally to be used by all calls to requests that
 # need to authenticate against SLIP's data snapshot file server
 # c.f. http://docs.python-requests.org/en/latest/user/advanced/
@@ -60,7 +63,7 @@ def fetch_download_snapshot(url):
         parsed_uri = urlparse(response.headers['Location'])
         domain = "{uri.scheme}://{uri.netloc}/".format(uri=parsed_uri)
         if parsed_uri.netloc.startswith("sso.slip.wa.gov.au") or parsed_uri.netloc.startswith("maps.slip.wa.gov.au"):
-            response = fetch_download_snapshot(response.headers['Location'], session)
+            response = fetch_download_snapshot(response.headers['Location'])
         else:
             raise Exception("Receieved a redirect to an unknown domain '%s' for %s" % (
                 parsed_uri.netloc, response.headers['Location']))
