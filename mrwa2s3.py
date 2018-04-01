@@ -9,6 +9,10 @@ import lib.utils
 import lib.ckan
 import lib.stats
 
+tmp_dir = os.path.join(os.getcwd(), "tmp")
+if not os.path.exists(tmp_dir):
+    os.makedirs(tmp_dir)
+
 stats = lib.stats.get_stats_object()
 
 for dataset in lib.ckan.get_public_slip_shapefiles():

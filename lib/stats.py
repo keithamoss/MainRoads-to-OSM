@@ -1,7 +1,6 @@
 import os
 import csv
 import tempfile
-import boto3
 import botocore
 import lib.s3
 import datetime
@@ -14,8 +13,7 @@ def get_stats_header():
 def download_file():
     try:
         file = tempfile.NamedTemporaryFile(suffix=".csv", dir=os.path.join(os.getcwd(), "tmp"))
-        s3 = boto3.resource("s3")
-        s3.Bucket(os.environ["AWS_BUCKET"]).download_fileobj("stats.csv", file)
+        lib.s3.get_s3_resource().Bucket(os.environ["AWS_BUCKET"]).download_fileobj("stats.csv", file)
         return file
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":

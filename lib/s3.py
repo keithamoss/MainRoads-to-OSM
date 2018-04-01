@@ -8,6 +8,14 @@ from lib.logset import myLog
 logger = myLog()
 
 
+def get_s3_client():
+    return boto3.client(service_name="s3", region_name=os.environ["AWS_REGION"], aws_access_key_id=os.environ["AWS_ACCESS_KEY"], aws_secret_access_key=os.environ["AWS_ACCESS_SECRET_KEY"])
+
+
+def get_s3_resource():
+    return boto3.resource(service_name="s3", region_name=os.environ["AWS_REGION"], aws_access_key_id=os.environ["AWS_ACCESS_KEY"], aws_secret_access_key=os.environ["AWS_ACCESS_SECRET_KEY"])
+
+
 def upload_to_s3(filename, key):
     """
     Uploads the given file to the AWS S3 bucket and key (S3 filename) specified.
@@ -26,15 +34,13 @@ def upload_to_s3(filename, key):
             file.seek(0, os.SEEK_END)
             size = file.tell()
 
-    s3 = boto3.client(service_name="s3", region_name=os.environ["AWS_REGION"], aws_access_key_id=os.environ["AWS_ACCESS_KEY"], aws_secret_access_key=os.environ["AWS_ACCESS_SECRET_KEY"])
-
     # Uploads the given file using a managed uploader, which will split up large
     # files automatically and upload parts in parallel.
-    s3.upload_file(filename, os.environ["AWS_BUCKET"], key)
+    get_s3_client().upload_file(filename, os.environ["AWS_BUCKET"], key)
 
     # Check the size of what we sent matches the size of what got there
-    s3 = boto3.resource("s3")
-    object_summary = s3.ObjectSummary(os.environ["AWS_BUCKET"], key)
+    # s3 = boto3.resource("s3")
+    object_summary = get_s3_resource().ObjectSummary(os.environ["AWS_BUCKET"], key)
 
     if object_summary.size != size:
         raise Exception("Failed uploading {} to S3 - size mismatch.".format(filename))
@@ -70,11 +76,9 @@ def create_and_upload_latest_json_metadata(zip_filename, s3_key, lastRefreshTime
 
 def fetch_latest_json_metadata(dataset_name):
     with tempfile.NamedTemporaryFile() as file:
-        s3 = boto3.resource("s3")
-
         try:
             s3_file = "{}/latest.json".format(dataset_name)
-            s3.Bucket(os.environ["AWS_BUCKET"]).download_fileobj(s3_file, file)
+            get_s3_resource().Bucket(os.environ["AWS_BUCKET"]).download_fileobj(s3_file, file)
             file.seek(0)
             return json.load(file)
         except botocore.exceptions.ClientError as e:
