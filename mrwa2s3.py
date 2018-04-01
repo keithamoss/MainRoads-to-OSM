@@ -15,7 +15,7 @@ if not os.path.exists(tmp_dir):
 
 stats = lib.stats.get_stats_object()
 
-for dataset in lib.ckan.get_public_slip_shapefiles()[:20]:
+for dataset in lib.ckan.get_public_slip_shapefiles():
     logger.info(dataset["name"])
 
     stats["datasetsWithPublicShapefiles"] += 1
