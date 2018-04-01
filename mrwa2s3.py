@@ -82,4 +82,4 @@ lib.stats.update_stats(stats)
 if logger.has_critical_or_errors():
     print "We've got a few errors:"
     print logger.status()
-    exit(1)
+    # exit(1)
