@@ -7,7 +7,7 @@ from lib.logset import myLog
 logger = myLog()
 
 import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+urllib3.disable_warnings()
 
 # Setup a Session object globally to be used by all calls to requests that
 # need to authenticate against SLIP's data snapshot file server

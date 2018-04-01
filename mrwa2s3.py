@@ -75,7 +75,7 @@ for dataset in lib.ckan.get_public_slip_shapefiles()[:20]:
         logger.info("")
 
 # Stats
-lib.stats.print_stats(stats)
+logger.info(lib.stats.stats_summary(stats))
 lib.stats.update_stats(stats)
 
 # So Travis-CI will notify us of issues

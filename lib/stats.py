@@ -63,7 +63,8 @@ def update_stats(stats):
     file.close()
 
 
-def print_stats(stats):
-    print "Stats"
+def stats_summary(stats):
+    summary = ["Stats"]
     for key, value in stats.iteritems():
-        print "{}: {}".format(key, value)
+        summary.append("{}: {}".format(key, value))
+    return "\n".join(summary)

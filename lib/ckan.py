@@ -3,7 +3,7 @@ from lib.logset import myLog
 logger = myLog()
 
 import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+urllib3.disable_warnings()
 
 
 def get_public_slip_shapefiles():
