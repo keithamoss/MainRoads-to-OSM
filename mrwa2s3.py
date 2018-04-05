@@ -20,6 +20,7 @@ for dataset in lib.ckan.get_public_slip_shapefiles():
 
     stats["datasetsWithPublicShapefiles"] += 1
     if len(dataset["resource_urls"]) > 1:
+        logger.info("Dataset has multiple shapefiles")
         stats["datasetWithMultipleShapefiles"] += 1
 
     for dataset_url in dataset["resource_urls"]:
@@ -33,8 +34,10 @@ for dataset in lib.ckan.get_public_slip_shapefiles():
             logger.info(lastRefreshTime)
 
             if lastRefreshTime is False:
+                logger.info("Dataset isn't in DUT")
                 stats["datasetsWithAFalseResponseFromDUT"] += 1
             elif lastRefreshTime == 0:
+                logger.info("Data is in DUT, but has never been loaded")
                 stats["datasetsWithA0ResponseFromDUT"] += 1
 
             if lib.slip.should_we_download(latest, lastRefreshTime) == True:
