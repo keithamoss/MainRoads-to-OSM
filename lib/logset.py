@@ -7,6 +7,7 @@ def counted(fn):
     def wrapper(*args, **kwargs):
         wrapper.count += 1
         return fn(*args, **kwargs)
+
     wrapper.count = 0
     wrapper.__name__ = fn.__name__
     return wrapper
@@ -34,7 +35,7 @@ class MyLogger(logging.Logger):
 
     def logfile(self):
         for h in self.handlers:
-            if hasattr(h, 'baseFilename'):
+            if hasattr(h, "baseFilename"):
                 return h.baseFilename
 
     def empty(self):
@@ -50,7 +51,11 @@ class MyLogger(logging.Logger):
             return False
 
     def status(self):
-        msg = "WARNINGS:%s ERRORS:%s CRITICAL:%s" % (self.warning.count, self.error.count, self.critical.count)
+        msg = "WARNINGS:%s ERRORS:%s CRITICAL:%s" % (
+            self.warning.count,
+            self.error.count,
+            self.critical.count,
+        )
         return msg
 
 
@@ -66,7 +71,7 @@ def addLogConsole(logger):
     handler = logging.StreamHandler()
     handler.setLevel(logging.INFO)
     # formatter = logging.Formatter("%(levelname)s\t: %(message)s")
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 

@@ -1,22 +1,37 @@
-import os
 import csv
-import tempfile
-import botocore
-import lib.s3
 import datetime
+import os
+import tempfile
+
+import botocore
+
+import lib.s3
 
 
 def get_stats_header():
-    return ["date", "datasetsWithPublicShapefiles", "datasetWithMultipleShapefiles", "datasetsWithAFalseResponseFromDUT", "datasetsWithA0ResponseFromDUT", "datasetsWithChangedData", "datasetsSkippedDueToSLIPTicks", "datasetsSkippedDueToChecksumMatch"]
+    return [
+        "date",
+        "datasetsWithPublicShapefiles",
+        "datasetWithMultipleShapefiles",
+        "datasetsWithAFalseResponseFromDUT",
+        "datasetsWithA0ResponseFromDUT",
+        "datasetsWithChangedData",
+        "datasetsSkippedDueToSLIPTicks",
+        "datasetsSkippedDueToChecksumMatch",
+    ]
 
 
 def download_file():
     try:
-        file = tempfile.NamedTemporaryFile(suffix=".csv", dir=os.path.join(os.getcwd(), "tmp"))
-        lib.s3.get_s3_resource().Bucket(os.environ["AWS_BUCKET"]).download_fileobj("stats.csv", file)
+        file = tempfile.NamedTemporaryFile(
+            suffix=".csv", dir=os.path.join(os.getcwd(), "tmp")
+        )
+        lib.s3.get_s3_resource().Bucket(os.environ["AWS_BUCKET"]).download_fileobj(
+            "stats.csv", file
+        )
         return file
     except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
+        if e.response["Error"]["Code"] == "404":
             return False
         else:
             raise
@@ -28,7 +43,9 @@ def upload_file(file):
 
 
 def init_stats_csv():
-    file = tempfile.NamedTemporaryFile(suffix=".csv", dir=os.path.join(os.getcwd(), "tmp"))
+    file = tempfile.NamedTemporaryFile(
+        suffix=".csv", dir=os.path.join(os.getcwd(), "tmp")
+    )
     writer = csv.writer(file)
     writer.writerow(get_stats_header())
     return file
@@ -48,7 +65,7 @@ def get_stats_object():
     stats = {}
     for key in get_stats_header():
         stats[key] = 0
-    stats["date"] = datetime.datetime.today().strftime('%Y-%m-%d')
+    stats["date"] = datetime.datetime.today().strftime("%Y-%m-%d")
     return stats
 
 

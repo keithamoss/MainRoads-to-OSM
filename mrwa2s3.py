@@ -1,13 +1,15 @@
 import os
 import tempfile
+
 from lib.logset import myLog
+
 logger = myLog()
 
-import lib.slip
-import lib.s3
-import lib.utils
 import lib.ckan
+import lib.s3
+import lib.slip
 import lib.stats
+import lib.utils
 
 tmp_dir = os.path.join(os.getcwd(), "tmp")
 if not os.path.exists(tmp_dir):
