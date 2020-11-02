@@ -11,3 +11,4 @@ geogig.txt
 .vscode/*
 *.pyc
 out*.txt
+.DS_Store

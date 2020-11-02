@@ -82,6 +82,6 @@ def update_stats(stats):
 
 def stats_summary(stats):
     summary = ["Stats"]
-    for key, value in stats.iteritems():
+    for key, value in stats.items():
         summary.append("{}: {}".format(key, value))
     return "\n".join(summary)

@@ -5,7 +5,7 @@ import tempfile
 import boto3
 import botocore
 
-import utils
+import lib.utils as utils
 from lib.logset import myLog
 
 logger = myLog()
